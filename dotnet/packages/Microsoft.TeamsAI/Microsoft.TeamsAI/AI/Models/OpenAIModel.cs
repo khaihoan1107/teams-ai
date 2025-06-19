@@ -23,7 +23,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Options;
 
-[assembly: InternalsVisibleTo("Microsoft.Teams.AI.Tests")]
 #pragma warning disable AOAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 namespace Microsoft.Teams.AI.AI.Models
 {
@@ -197,8 +196,8 @@ namespace Microsoft.Teams.AI.AI.Models
 
             // Get the model to use.
             string model = promptTemplate.Configuration.Completion.Model ?? _deploymentName;
-            bool isO1Model = model.StartsWith("o1-");
-            bool useSystemMessages = !isO1Model && _options.UseSystemMessages.GetValueOrDefault(false);
+            bool isThinkingModel = model.StartsWith("o1") || model.StartsWith("o3");
+            bool useSystemMessages = !isThinkingModel && _options.UseSystemMessages.GetValueOrDefault(false);
             if (!useSystemMessages && prompt.Output.Count > 0 && prompt.Output[0].Role == ChatRole.System)
             {
                 prompt.Output[0].Role = ChatRole.User;
@@ -221,7 +220,7 @@ namespace Microsoft.Teams.AI.AI.Models
                 FrequencyPenalty = (float)completion.FrequencyPenalty,
             };
 
-            if (isO1Model)
+            if (isThinkingModel)
             {
                 chatCompletionOptions.MaxOutputTokenCount = completion.MaxTokens;
                 chatCompletionOptions.Temperature = 1;
